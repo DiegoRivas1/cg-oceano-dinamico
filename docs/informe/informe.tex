@@ -1,0 +1,132 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{teal}
+}
+
+\title{Sistema de Animación por Computador de un Océano \\ \large Proyecto Final 1 --- Computación Gráfica}
+\author{[Nombres de los integrantes] \\ Universidad Nacional de San Agustín de Arequipa \\ Escuela Profesional de Ciencia de la Computación}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este informe describe el diseño e implementación de un sistema de animación
+por computador que simula la superficie de un océano en movimiento mediante
+OpenGL. Se detalla la generación de la malla, el cálculo de alturas basado en
+la superposición de olas sinusoidales, el cómputo de normales, el
+texturizado, la iluminación y los elementos adicionales incorporados a la
+escena.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+% Contexto del proyecto, objetivo general, tecnologías usadas (C++20, OpenGL
+% Core Profile 3.3, GLFW, GLAD, ImGui, CMake).
+
+\section{Generación de la Malla}
+% Explicar la malla regular sobre el plano xz: resolución elegida (filas x
+% columnas), separación entre puntos, cómo se arma el buffer de vértices e
+% índices (dos triángulos por celda).
+
+\subsection{Estructura de datos}
+% PuntoMalla: por qué solo guarda posición base + UV (y no normal), dado que
+% la altura/normal se recalculan en GPU cada frame.
+
+\section{Modelo Matemático de las Olas}
+% Reproducir la fórmula del enunciado:
+\begin{equation}
+    h(x, z, t) = \sum_{i=1}^{n} A_i \cos\big(k_i (x\cos(d_i) + z\sin(d_i)) - 2\pi f_i t + p_i\big)
+\end{equation}
+\begin{equation}
+    k_i = \frac{4\pi^2 f_i^2}{9.81}
+\end{equation}
+% Explicar de dónde salen los parámetros: archivo data/spectrum.txt (19
+% olas, columnas amplitud/dirección/frecuencia) y que la fase se generó
+% aleatoriamente con semilla fija para reproducibilidad.
+
+\subsection{Cálculo en GPU vs. CPU}
+% Justificar la decisión: 19 olas x malla de ~150x150 puntos x 60fps es
+% mucho para hacerlo en CPU cada frame; se mueve el cómputo al vertex
+% shader. Mostrar fragmento relevante de oceano.vert.
+\begin{lstlisting}[language=C, caption={Fragmento de oceano.vert: cálculo de altura y normal analítica}]
+for (int i = 0; i < numOlas; ++i) {
+    float faseTotal = numeroOnda[i] * (x*dirX + z*dirZ)
+                     - DOS_PI * frecuencia[i] * tiempo + fase[i];
+    altura += amplitud[i] * cos(faseTotal);
+    float derivComun = -amplitud[i] * numeroOnda[i] * sin(faseTotal);
+    dHdx += derivComun * dirX;
+    dHdz += derivComun * dirZ;
+}
+normal = normalize(vec3(-dHdx, 1.0, -dHdz));
+\end{lstlisting}
+
+\section{Cálculo de Normales}
+% Explicar la normal analítica: derivar h(x,z,t) respecto a x y z, y por
+% qué normalize(-dh/dx, 1, -dh/dz) es la normal de la superficie
+% parametrizada (x, h(x,z), z). Comparar brevemente con la alternativa de
+% promediar normales de caras vecinas (usada en cg-labs anteriores).
+
+\section{Texturizado}
+% ocean.tga (1024x1024), carga con stb_image, coordenadas s,t generadas al
+% construir la malla, animación de UV con offset en el tiempo para dar
+% sensación de flujo. Incluir captura con textura activada/desactivada (T).
+
+\section{Iluminación y Materiales}
+% Modelo Phong: componente ambiental + difusa + especular. Justificar los
+% valores elegidos para el océano (especular alto para simular brillos en
+% el agua). Mencionar la segunda fuente de luz aportada por el faro.
+
+\section{Cámara}
+% Cámara orbital: coordenadas esféricas (radio, yaw, pitch), controles de
+% mouse (rotar) y scroll (zoom).
+
+\section{Elementos Adicionales}
+\subsection{Barco}
+% Cómo se arma (casco+mástil+vela) y cómo flota muestreando
+% Oceano::alturaEn(x,z).
+\subsection{Isla y Rocas}
+% Generación procedural con semilla fija.
+\subsection{Faro}
+% Torre+cúpula, aporte de una segunda luz puntual con parpadeo.
+\subsection{Skybox}
+% Cúpula con gradiente de color como alternativa a un cubemap externo.
+
+\section{Patrones de Diseño Aplicados}
+% Strategy (FuenteOlas), Builder (Oceano::Builder), Factory Method
+% (ElementoEscenaFactory), Composición (ObjetoRenderizable, Escena).
+% Justificar brevemente por qué cada patrón encaja en su rol.
+
+\section{Resultados}
+% Capturas de pantalla del océano en distintos momentos de la animación,
+% con y sin textura/iluminación, distintos ángulos de cámara.
+
+\section{Conclusiones}
+% Dificultades encontradas, aprendizajes, posibles mejoras (ej. espuma en
+% las crestas, reflejo/refracción con render-to-texture, LOD de la malla).
+
+\section{Referencias}
+% Enunciado del proyecto, documentación de OpenGL/GLSL, Fournier & Reeves
+% (1986) "A simple model of ocean waves" si se cita el modelo de suma de
+% senoides, etc.
+
+\end{document}
