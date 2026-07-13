@@ -31,6 +31,19 @@ void Escena::actualizar(float deltaTiempo) {
     tiempoTotal_ += deltaTiempo;
     oceano_->actualizar(deltaTiempo);
     for (auto& elemento : elementos_) elemento->actualizar(tiempoTotal_, *oceano_);
+
+    // Ola erratica periodica: amplitud bien por encima de las olas normales
+    // (que rondan 0.2-0.5, ver spectrum.txt) para que se note claramente.
+    tiempoParaProximaErratica_ -= deltaTiempo;
+    if (tiempoParaProximaErratica_ <= 0.0f) {
+        oceano_->activarOlaErratica(
+            /*amplitudMax*/ 6.0f,
+            /*direccionRad*/ direccionErratica_(generadorErratica_),
+            /*frecuencia*/ 0.18f,
+            /*duracion*/ 6.0f
+        );
+        tiempoParaProximaErratica_ = intervaloErratica_(generadorErratica_);
+    }
 }
 
 void Escena::dibujar(float aspecto) const {

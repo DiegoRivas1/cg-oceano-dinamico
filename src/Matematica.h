@@ -61,6 +61,24 @@ struct Mat4 {
         return r;
     }
 
+    // Pitch (cabeceo proa/popa) del barco sobre la ola.
+    static Mat4 rotarX(float radianes) {
+        Mat4 r = identidad();
+        float c = std::cos(radianes), s = std::sin(radianes);
+        r.m[5] = c;  r.m[6] = s;
+        r.m[9] = -s; r.m[10] = c;
+        return r;
+    }
+
+    // Roll (balanceo lateral) del barco sobre la ola.
+    static Mat4 rotarZ(float radianes) {
+        Mat4 r = identidad();
+        float c = std::cos(radianes), s = std::sin(radianes);
+        r.m[0] = c;  r.m[1] = s;
+        r.m[4] = -s; r.m[5] = c;
+        return r;
+    }
+
     // fovYRad: campo de vision vertical en radianes
     static Mat4 perspectiva(float fovYRad, float aspecto, float cercano, float lejano) {
         Mat4 r{};

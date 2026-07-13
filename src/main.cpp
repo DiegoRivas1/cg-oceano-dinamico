@@ -1,5 +1,5 @@
 // main.cpp
-// Sistema de Animacion por Computador de un Oceano - Proyecto Final CG
+// Sistema de Animacion por Computador de un Oceano
 // GLFW (ventana/input) + GLAD (carga de OpenGL Core Profile) + ImGui (panel de control)
 
 #include <glad/glad.h>
@@ -57,9 +57,9 @@ void procesarTeclado(GLFWwindow* ventana) {
         if (!teclaLPresionada) { g_escena->oceano().alternarIluminacion(); teclaLPresionada = true; }
     } else teclaLPresionada = false;
 
-    // Aumentar/disminuir velocidad de animacion (+ / -)
-    if (glfwGetKey(ventana, GLFW_KEY_EQUAL) == GLFW_PRESS) g_velocidadAnimacion += 0.01f;
-    if (glfwGetKey(ventana, GLFW_KEY_MINUS) == GLFW_PRESS) g_velocidadAnimacion = std::max(0.0f, g_velocidadAnimacion - 0.01f);
+    // Aumentar/disminuir velocidad de animacion (teclado numerico + / -)
+    if (glfwGetKey(ventana, GLFW_KEY_KP_ADD) == GLFW_PRESS) g_velocidadAnimacion += 0.01f;
+    if (glfwGetKey(ventana, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) g_velocidadAnimacion = std::max(0.0f, g_velocidadAnimacion - 0.01f);
 }
 
 int main() {
@@ -97,7 +97,7 @@ int main() {
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(ventana, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui_ImplOpenGL3_Init("#version 120");
 
     Escena escena;
     g_escena = &escena;

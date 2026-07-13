@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(EXTERNAL_DIR "${CMAKE_CURRENT_LIST_DIR}/external" CACHE PATH "Ruta a external/")
 set(SHARED_DIR   "${CMAKE_CURRENT_LIST_DIR}/shared"   CACHE PATH "Ruta a shared/")
 
-# Copia aqui (o symlink) tu carpeta imgui-1.92.8-1.92.8 y glad ya usados en cg_labs
+# Copia aqui (o symlink) tu carpeta imgui-1.92.8 y glad ya usados en cg_labs
 set(IMGUI_DIR "${EXTERNAL_DIR}/imgui-1.92.8")
 set(GLAD_DIR  "${EXTERNAL_DIR}/glad")
 
@@ -23,6 +23,7 @@ add_executable(cg_oceano
     src/GestorOlas.cpp
     src/Oceano.cpp
     src/Shader.cpp
+    src/ObjetoRenderizable.cpp
     src/Camara.cpp
     src/Primitivas.cpp
     src/Barco.cpp
@@ -41,7 +42,6 @@ add_executable(cg_oceano
     ${IMGUI_DIR}/imgui_demo.cpp
     ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
     ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
-        shared/stb_image.h
 )
 
 target_include_directories(cg_oceano PRIVATE

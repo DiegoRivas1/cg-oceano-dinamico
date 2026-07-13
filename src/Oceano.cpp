@@ -2,6 +2,7 @@
 #include "PuntoMalla.h"
 
 #include <glad/glad.h>
+#include <cmath>
 #include <iostream>
 
 // -------------------- Define STB solo en esta traduccion --------------------
@@ -44,8 +45,8 @@ std::unique_ptr<Oceano> Oceano::Builder::construir() {
     if (static_cast<int>(olas_.size()) > Oceano::MAX_OLAS) {
         std::cerr << "[Oceano] Advertencia: " << olas_.size()
                   << " olas superan MAX_OLAS=" << Oceano::MAX_OLAS
-                  << ", se recortan las de menor amplitud primero cargadas.\n";
-        olas_.resize(Oceano::MAX_OLAS);
+                  << ", se recortan las excedentes.\n";
+        olas_.erase(olas_.begin() + Oceano::MAX_OLAS, olas_.end());
     }
 
     oceano->olas_ = olas_;
@@ -158,6 +159,37 @@ void Oceano::actualizar(float deltaTiempo) {
     tiempoAcumulado_ += deltaTiempo * velocidad_;
 }
 
+std::optional<Ola> Oceano::olaErraticaActual() const {
+    if (!olaErratica_.activa) return std::nullopt;
+
+    float t = tiempoAcumulado_ - olaErratica_.tiempoInicio;
+    if (t < 0.0f || t > olaErratica_.duracion) return std::nullopt;
+
+    // Envolvente en forma de campana: 0 al inicio, pico en el centro, 0 al final.
+    float u = t / olaErratica_.duracion;
+    float envolvente = std::sin(3.14159265f * u);
+    float amplitud = olaErratica_.amplitudMax * envolvente;
+
+    return Ola(amplitud, olaErratica_.direccion, olaErratica_.frecuencia, olaErratica_.fase);
+}
+
+void Oceano::activarOlaErratica(float amplitudMax, float direccionRad, float frecuencia, float duracion) {
+    olaErratica_.activa = true;
+    olaErratica_.amplitudMax = amplitudMax;
+    olaErratica_.direccion = direccionRad;
+    olaErratica_.frecuencia = frecuencia;
+    olaErratica_.fase = 0.0f;
+    olaErratica_.tiempoInicio = tiempoAcumulado_;
+    olaErratica_.duracion = duracion;
+}
+
+void Oceano::gradienteEn(float x, float z, float& dHdx, float& dHdz) const {
+    dHdx = 0.0f;
+    dHdz = 0.0f;
+    for (const auto& ola : olas_) ola.gradiente(x, z, tiempoAcumulado_, dHdx, dHdz);
+    if (auto errante = olaErraticaActual()) errante->gradiente(x, z, tiempoAcumulado_, dHdx, dHdz);
+}
+
 void Oceano::subirUniformesOlas() const {
     float amplitudes[MAX_OLAS]{}, direcciones[MAX_OLAS]{}, frecuencias[MAX_OLAS]{};
     float numerosOnda[MAX_OLAS]{}, fases[MAX_OLAS]{};
@@ -169,6 +201,16 @@ void Oceano::subirUniformesOlas() const {
         frecuencias[i]  = olas_[i].frecuencia();
         numerosOnda[i]  = olas_[i].numeroOnda();
         fases[i]        = olas_[i].fase();
+    }
+
+    // La ola erratica ocupa un slot extra mientras esta activa (si hay espacio).
+    if (auto errante = olaErraticaActual(); errante && n < MAX_OLAS) {
+        amplitudes[n]   = errante->amplitud();
+        direcciones[n]  = errante->direccion();
+        frecuencias[n]  = errante->frecuencia();
+        numerosOnda[n]  = errante->numeroOnda();
+        fases[n]        = errante->fase();
+        ++n;
     }
 
     shader_->setInt("numOlas", n);
@@ -216,5 +258,6 @@ void Oceano::dibujar(const Mat4& vista, const Mat4& proyeccion, const Vec3& posC
 float Oceano::alturaEn(float x, float z) const {
     float h = 0.0f;
     for (const auto& ola : olas_) h += ola.altura(x, z, tiempoAcumulado_);
+    if (auto errante = olaErraticaActual()) h += errante->altura(x, z, tiempoAcumulado_);
     return h;
 }

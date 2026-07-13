@@ -14,12 +14,16 @@ void Barco::actualizar(float /*tiempo*/, const Oceano& oceano) {
     // exactamente sobre la superficie deformada por las olas.
     alturaActual_ = oceano.alturaEn(posicionBase_.x, posicionBase_.z);
 
-    // Balanceo simple: comparamos la altura un poco adelante/atras del barco
-    // para estimar la pendiente local y usarla como angulo de cabeceo.
-    const float delta = 0.5f;
-    float alturaAdelante = oceano.alturaEn(posicionBase_.x, posicionBase_.z + delta);
-    float alturaAtras    = oceano.alturaEn(posicionBase_.x, posicionBase_.z - delta);
-    balanceo_ = std::atan2(alturaAdelante - alturaAtras, 2.0f * delta) * 0.5f;
+    // Pendiente local exacta (dh/dx, dh/dz) via derivada analitica -> el
+    // barco se inclina como si "chocara" con la forma real del agua. Con
+    // olas normales da un balanceo sutil; si el Oceano tiene una ola
+    // erratica activa, la pendiente se vuelve mucho mas pronunciada y el
+    // barco se inclina de forma dramatica sin necesitar codigo especial.
+    float dHdx = 0.0f, dHdz = 0.0f;
+    oceano.gradienteEn(posicionBase_.x, posicionBase_.z, dHdx, dHdz);
+
+    roll_  = std::atan(dHdx);
+    pitch_ = std::atan(dHdz);
 }
 
 void Barco::dibujar(const Mat4& vista, const Mat4& proyeccion,
@@ -35,7 +39,8 @@ void Barco::dibujar(const Mat4& vista, const Mat4& proyeccion,
     shader_->setFloat("brillo", 16.0f);
 
     Mat4 flotacion = Mat4::trasladar({posicionBase_.x, alturaActual_ + 0.4f, posicionBase_.z})
-                    * Mat4::rotarY(0.0f);
+                    * Mat4::rotarZ(roll_)
+                    * Mat4::rotarX(pitch_);
 
     shader_->setVec3("colorObjeto", Vec3{0.35f, 0.22f, 0.10f}); // casco: madera
     casco_->dibujar(*shader_, flotacion);

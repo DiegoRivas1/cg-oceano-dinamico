@@ -25,5 +25,6 @@ private:
 
     Vec3 posicionBase_;   // (x, _, z) fijo; la y se recalcula cada frame
     float alturaActual_ = 0.0f;
-    float balanceo_ = 0.0f; // angulo de cabeceo, en radianes
+    float roll_ = 0.0f;   // balanceo lateral (izquierda/derecha), en radianes
+    float pitch_ = 0.0f;  // cabeceo (proa/popa), en radianes
 };

@@ -10,6 +10,7 @@
 // tipo Oceano::Builder().conTamano(...).conOlas(...).construir();
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -54,6 +55,18 @@ public:
     // Usada por otros elementos de la escena (ej. el barco) para "flotar".
     float alturaEn(float x, float z) const;
 
+    // Pendiente local del oceano en (x,z): dh/dx, dh/dz. El barco la usa
+    // para inclinarse (roll/pitch) segun la ola que tiene debajo.
+    void gradienteEn(float x, float z, float& dHdx, float& dHdz) const;
+
+    // Activa una "ola erratica": una ola transitoria de amplitud grande que
+    // aparece durante 'duracion' segundos (con una envolvente suave, sube y
+    // baja) y luego desaparece. Al sumarse a las demas olas, la pendiente
+    // local se vuelve mucho mas pronunciada donde pasa - suficiente para
+    // que el barco se incline de forma dramatica sin logica especial de
+    // "volcado": es la misma flotacion normal, solo que con una ola enorme.
+    void activarOlaErratica(float amplitudMax, float direccionRad, float frecuencia, float duracion = 6.0f);
+
     void alternarTextura()      { usarTextura_ = !usarTextura_; }
     void alternarIluminacion()  { usarIluminacion_ = !usarIluminacion_; }
     void setVelocidad(float v)  { velocidad_ = v; }
@@ -66,9 +79,26 @@ private:
     void cargarTextura(const std::string& rutaTextura);
     void subirUniformesOlas() const;
 
+    // Si hay una ola erratica activa y estamos dentro de su ventana de
+    // tiempo, devuelve una Ola "temporal" con su amplitud actual (ya con
+    // la envolvente aplicada). Se usa tanto para el shader como para
+    // alturaEn()/gradienteEn() en CPU, asi la logica no se duplica.
+    std::optional<Ola> olaErraticaActual() const;
+
     int filas_ = 0, columnas_ = 0;
     float separacion_ = 1.0f;
     std::vector<Ola> olas_;
+
+    struct OlaErratica {
+        bool activa = false;
+        float amplitudMax = 0.0f;
+        float direccion = 0.0f;
+        float frecuencia = 0.0f;
+        float fase = 0.0f;
+        float tiempoInicio = 0.0f;
+        float duracion = 6.0f;
+    };
+    OlaErratica olaErratica_;
 
     unsigned int vao_ = 0, vbo_ = 0, ebo_ = 0;
     unsigned int texturaId_ = 0;

@@ -1,6 +1,6 @@
 # cg-oceano-dinamico
 
-Proyecto Final 1 — Computación Gráfica (UNSA-EPCC).
+
 Sistema de animación por computador de un océano en movimiento, usando OpenGL Core Profile + GLSL.
 
 ## Descripción
@@ -23,7 +23,7 @@ por vértice por frame — más eficiente con 19 olas y una malla de ~150×150 p
 | Clase | Responsabilidad |
 |---|---|
 | `Ola` | Una ola individual: amplitud, dirección, frecuencia, fase, número de onda. También evalúa `altura(x,z,t)` en CPU (usada por el barco para flotar). |
-| `FuenteOlas` / `OlasManual` / `OlasDesdeArchivo` | **Patrón Strategy** — origen de las olas (código vs. `spectrum.txt`), intercambiable sin tocar `Oceano`. |
+| `FuenteOlas` / `OlasManual` / `OlasDesdeArchivo` | **Patrón Strategy** origen de las olas (código vs. `spectrum.txt`), intercambiable sin tocar `Oceano`. |
 | `PuntoMalla` | Vértice base de la malla: posición `(x,0,z)` + UV `(s,t)`. |
 | `Oceano` | Construye la malla, sube uniforms de olas, dibuja. Se construye con **`Oceano::Builder`**. |
 | `Shader` | Wrapper de compilación/enlace de programas GLSL y subida de uniforms. |
@@ -31,15 +31,15 @@ por vértice por frame — más eficiente con 19 olas y una malla de ~150×150 p
 | `Primitivas` | Generadores procedurales de malla (caja, esfera, cono, cilindro). |
 | `ObjetoRenderizable` | Composición: sube una `MallaSimple` a GPU y se dibuja con un `Shader` dado. |
 | `ElementoEscena` | Interfaz común de `Barco`, `Isla`, `Faro`, `Skybox`. |
-| `ElementoEscenaFactory` | **Patrón Factory Method** — crea cada tipo de elemento adicional. |
+| `ElementoEscenaFactory` | **Patrón Factory Method** crea cada tipo de elemento adicional. |
 | `Escena` | Composición final: `Oceano` + elementos + `Camara` + luces. |
 
 ## Elementos adicionales de la escena
 
-- **Barco** — flota muestreando `Oceano::alturaEn(x,z)` bajo su posición, con balanceo según la pendiente local.
-- **Isla + rocas** — generación procedural con semilla fija (reproducible).
-- **Faro** — además decorativo, expone `posicionLuz()` como segunda fuente de luz (parpadeo incluido).
-- **Skybox** — cúpula con gradiente de color (sin depender de texturas cubemap externas).
+- **Barco** flota muestreando `Oceano::alturaEn(x,z)` bajo su posición, con balanceo según la pendiente local.
+- **Isla + rocas** generación procedural con semilla fija (reproducible).
+- **Faro** además decorativo, expone `posicionLuz()` como segunda fuente de luz (parpadeo incluido).
+- **Skybox** cúpula con gradiente de color (sin depender de texturas cubemap externas).
 
 ## Compilar (CLion + MSYS2 UCRT64)
 
@@ -68,7 +68,7 @@ junto al ejecutable en cada build.
 ## Archivo de olas (`data/spectrum.txt`)
 
 3 columnas separadas por espacio/tab: `amplitud  dirección(rad)  frecuencia`.
-La fase no está en el archivo — se genera aleatoriamente con semilla fija
+La fase no está en el archivo se genera aleatoriamente con semilla fija
 (`OlasDesdeArchivo`, semilla=42) para que la animación sea reproducible entre
 ejecuciones (útil para grabar el video de entrega).
 

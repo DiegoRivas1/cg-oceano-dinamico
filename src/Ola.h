@@ -14,6 +14,12 @@ public:
     // Altura de esta ola sola, en el punto (x,z) en el instante t.
     float altura(float x, float z, float tiempo) const;
 
+    // Suma la contribucion de esta ola a las derivadas parciales de h(x,z,t)
+    // en (dHdx, dHdz). Es la misma matematica del vertex shader, evaluada en
+    // CPU para un solo punto (ej. la posicion del barco). ACUMULA (+=), no
+    // reemplaza, para poder sumar varias olas con el mismo par de variables.
+    void gradiente(float x, float z, float tiempo, float& dHdx, float& dHdz) const;
+
     float amplitud() const   { return amplitud_; }
     float direccion() const  { return direccion_; }
     float frecuencia() const { return frecuencia_; }
