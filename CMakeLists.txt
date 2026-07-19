@@ -42,6 +42,9 @@ add_executable(cg_oceano
     ${IMGUI_DIR}/imgui_demo.cpp
     ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
     ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        shared/OBJLoader.h
+        src/ObjetoRenderizableTexturado.h
+        src/ObjetoRenderizableTexturado.cpp
 )
 
 target_include_directories(cg_oceano PRIVATE
@@ -63,10 +66,12 @@ target_link_libraries(cg_oceano PRIVATE
 # Copiar shaders/texturas/datos junto al ejecutable en cada build
 # ------------------------------------------------------------------
 add_custom_command(TARGET cg_oceano POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_LIST_DIR}/shaders" "$<TARGET_FILE_DIR:cg_oceano>/shaders"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_LIST_DIR}/textures" "$<TARGET_FILE_DIR:cg_oceano>/textures"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_LIST_DIR}/data" "$<TARGET_FILE_DIR:cg_oceano>/data"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_LIST_DIR}/models" "$<TARGET_FILE_DIR:cg_oceano>/models"
 )

@@ -2,6 +2,7 @@
 #include "ElementoEscenaFactory.h"
 #include "GestorOlas.h"
 #include "Faro.h"
+#include <iostream>
 
 Escena::Escena() {
     // --- Oceano: Builder + Strategy (olas desde archivo) ---
@@ -37,12 +38,34 @@ void Escena::actualizar(float deltaTiempo) {
     tiempoParaProximaErratica_ -= deltaTiempo;
     if (tiempoParaProximaErratica_ <= 0.0f) {
         oceano_->activarOlaErratica(
-            /*amplitudMax*/ 6.0f,
+            /*amplitudMax*/ 3.0f,
             /*direccionRad*/ direccionErratica_(generadorErratica_),
             /*frecuencia*/ 0.18f,
             /*duracion*/ 6.0f
         );
         tiempoParaProximaErratica_ = intervaloErratica_(generadorErratica_);
+    }
+
+    // Barcos extra: aparicion aleatoria, uno a la vez, hasta MAX_BARCOS_EXTRA.
+    // Se agregan DESPUES del for de arriba para no invalidar su iteracion.
+    if (barcosExtraCreados_ < MAX_BARCOS_EXTRA) {
+        tiempoParaProximoBarco_ -= deltaTiempo;
+        if (tiempoParaProximoBarco_ <= 0.0f) {
+            Vec3 centro{posicionBarcoAleatoria_(generadorErratica_), 0.0f, posicionBarcoAleatoria_(generadorErratica_)};
+            float radio = radioBarcoAleatorio_(generadorErratica_);
+            float velocidad = velocidadBarcoAleatoria_(generadorErratica_)
+                             * (signoGiroAleatorio_(generadorErratica_) ? 1.0f : -1.0f);
+            float anguloInicial = anguloBarcoAleatorio_(generadorErratica_);
+
+            elementos_.push_back(ElementoEscenaFactory::crear(
+                TipoElemento::Barco, shaderBasico_.get(), centro, radio, velocidad, anguloInicial));
+
+            std::cout << "[Escena] Barco extra #" << (barcosExtraCreados_ + 1)
+                      << " aparecio en (" << centro.x << ", " << centro.z << ")\n";
+
+            ++barcosExtraCreados_;
+            tiempoParaProximoBarco_ = intervaloBarcoAleatorio_(generadorErratica_);
+        }
     }
 }
 
