@@ -3,6 +3,9 @@
 
 Sistema de animación por computador de un océano en movimiento, usando OpenGL Core Profile + GLSL.
 
+## Demo
+![demo](shared/demo_barco.gif)
+
 ## Descripción
 
 La superficie del océano es una malla regular de triángulos sobre el plano `xz`.
