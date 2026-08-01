@@ -41,7 +41,7 @@ void main() {
     vec3 dirVista = normalize(posCamara - fragPos);
     vec3 reflejo = reflect(-dirLuz, n);
 
-    vec3 ambiente = colorAmbiente * colorBase;
+    vec3 ambiente = colorAmbiente * colorBase * colorLuz;      // (oceano.frag)
 
     float difIntensidad = max(dot(n, dirLuz), 0.0);
     vec3 difuso = difIntensidad * colorBase * colorLuz;

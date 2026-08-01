@@ -20,8 +20,12 @@ public:
     void dibujar(const Mat4& vista, const Mat4& proyeccion,
                  const Vec3& posCamara, const Vec3& posLuz, const Vec3& colorLuz) const override;
 
+    void actualizar(float tiempo, const Oceano& oceano) override;
+
 private:
     std::unique_ptr<Shader> shader_;
     std::unique_ptr<ObjetoRenderizable> esfera_;
     float radio_;
+    Vec3 colorCimaActual_{0.30f, 0.55f, 0.85f};
+    Vec3 colorHorizonteActual_{0.85f, 0.85f, 0.80f};
 };

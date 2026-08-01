@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <cmath>
 #include <iostream>
-
+#include <algorithm>
 // -------------------- Define STB solo en esta traduccion --------------------
 // stb_image.h se copia desde tus otros labs (shared/) - es header-only.
 #define STB_IMAGE_IMPLEMENTATION
@@ -188,6 +188,9 @@ void Oceano::gradienteEn(float x, float z, float& dHdx, float& dHdz) const {
     dHdz = 0.0f;
     for (const auto& ola : olas_) ola.gradiente(x, z, tiempoAcumulado_, dHdx, dHdz);
     if (auto errante = olaErraticaActual()) errante->gradiente(x, z, tiempoAcumulado_, dHdx, dHdz);
+    float factor = factorCalmaEn(x, z);
+    dHdx *= factor;
+    dHdz *= factor;
 }
 
 void Oceano::subirUniformesOlas() const {
@@ -219,6 +222,10 @@ void Oceano::subirUniformesOlas() const {
     shader_->setFloatArray("frecuencia", frecuencias, n);
     shader_->setFloatArray("numeroOnda", numerosOnda, n);
     shader_->setFloatArray("fase", fases, n);
+
+    shader_->setVec3("zonaCalmaCentro", zonaCalmaCentro_);
+    shader_->setFloat("zonaCalmaRadio", zonaCalmaRadio_);
+    shader_->setFloat("zonaCalmaMargen", zonaCalmaMargen_);
 }
 
 void Oceano::dibujar(const Mat4& vista, const Mat4& proyeccion, const Vec3& posCamara,
@@ -255,9 +262,34 @@ void Oceano::dibujar(const Mat4& vista, const Mat4& proyeccion, const Vec3& posC
     glBindVertexArray(0);
 }
 
+// AHORA:
 float Oceano::alturaEn(float x, float z) const {
     float h = 0.0f;
     for (const auto& ola : olas_) h += ola.altura(x, z, tiempoAcumulado_);
     if (auto errante = olaErraticaActual()) h += errante->altura(x, z, tiempoAcumulado_);
-    return h;
+    return h * factorCalmaEn(x, z);
+}
+
+namespace {
+    // Igual que la funcion smoothstep de GLSL - necesitamos la misma logica
+    // tambien en CPU para que alturaEn()/gradienteEn() (usados por los barcos)
+    // sean consistentes con lo que se ve en el shader.
+    float suavizarEscalon(float borde0, float borde1, float x) {
+        float t = std::clamp((x - borde0) / (borde1 - borde0), 0.0f, 1.0f);
+        return t * t * (3.0f - 2.0f * t);
+    }
+}
+
+void Oceano::establecerZonaCalma(Vec3 centro, float radio, float margen) {
+    zonaCalmaCentro_ = centro;
+    zonaCalmaRadio_ = radio;
+    zonaCalmaMargen_ = margen;
+}
+
+float Oceano::factorCalmaEn(float x, float z) const {
+    if (zonaCalmaRadio_ < 0.0f) return 1.0f; // zona de calma desactivada
+    float dx = x - zonaCalmaCentro_.x;
+    float dz = z - zonaCalmaCentro_.z;
+    float distancia = std::sqrt(dx * dx + dz * dz);
+    return suavizarEscalon(zonaCalmaRadio_, zonaCalmaRadio_ + zonaCalmaMargen_, distancia);
 }

@@ -37,8 +37,21 @@ ObjetoRenderizableTexturado::ObjetoRenderizableTexturado(const MallaOBJ& malla, 
     stbi_set_flip_vertically_on_load(true);
     unsigned char* datos = stbi_load(rutaTextura.c_str(), &ancho, &alto, &canales, 0);
     if (datos) {
-        GLenum formato = (canales == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, formato, ancho, alto, 0, formato, GL_UNSIGNED_BYTE, datos);
+        GLenum formato;
+
+        switch (canales) {
+        case 1: formato = GL_RED;  break;
+        case 3: formato = GL_RGB;  break;
+        case 4: formato = GL_RGBA; break;
+        default:
+            std::cerr << "Formato de textura no soportado\n";
+            stbi_image_free(datos);
+            return;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, formato,
+                     ancho, alto, 0,
+                     formato, GL_UNSIGNED_BYTE, datos);
         glGenerateMipmap(GL_TEXTURE_2D);
         std::cout << "[ObjetoRenderizableTexturado] Textura cargada: " << rutaTextura << "\n";
     } else {

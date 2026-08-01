@@ -20,6 +20,10 @@ uniform mat4 modelo;
 uniform mat4 vista;
 uniform mat4 proyeccion;
 
+uniform vec3 zonaCalmaCentro;
+uniform float zonaCalmaRadio;
+uniform float zonaCalmaMargen;
+
 out vec3 fragPos;
 out vec3 normal;
 out vec2 uv;
@@ -47,6 +51,14 @@ void main() {
         float derivComun = -amplitud[i] * k * sin(faseTotal);
         dHdx += derivComun * dirX;
         dHdz += derivComun * dirZ;
+    }
+
+    if (zonaCalmaRadio >= 0.0) {
+        float distancia = length(vec2(x - zonaCalmaCentro.x, z - zonaCalmaCentro.z));
+        float factorCalma = smoothstep(zonaCalmaRadio, zonaCalmaRadio + zonaCalmaMargen, distancia);
+        altura *= factorCalma;
+        dHdx *= factorCalma;
+        dHdz *= factorCalma;
     }
 
     vec3 posicion = vec3(x, altura, z);

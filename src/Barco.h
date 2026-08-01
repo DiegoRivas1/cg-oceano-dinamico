@@ -19,8 +19,9 @@ public:
     // centroOrbita: punto alrededor del cual navega. radioOrbita/velocidadAngular
     // controlan el circulo de navegacion; anguloInicial desfasa el punto de partida
     // (util para que varios barcos no arranquen todos en el mismo punto).
-    Barco(Vec3 centroOrbita, Shader* shader,
-          float radioOrbita = 6.0f, float velocidadAngular = 0.15f, float anguloInicial = 0.0f);
+    Barco(Vec3 centroOrbita, Shader* shaderBasico, Shader* shaderTexturado,
+      ObjetoRenderizableTexturado* modeloCompartido, // nullptr si no hay modelo real disponible
+      float radioOrbita = 6.0f, float velocidadAngular = 0.15f, float anguloInicial = 0.0f);
 
     void actualizar(float tiempo, const Oceano& oceano) override;
     void dibujar(const Mat4& vista, const Mat4& proyeccion,
@@ -46,8 +47,8 @@ private:
     std::unique_ptr<ObjetoRenderizable> vela_;
 
     bool usaModeloReal_ = false;
-    std::unique_ptr<Shader> shaderTexturado_;
-    std::unique_ptr<ObjetoRenderizableTexturado> modeloReal_;
+    Shader* shaderTexturado_ = nullptr;
+    ObjetoRenderizableTexturado* modeloReal_ = nullptr;
 
     // --- Movimiento: navegacion circular alrededor de centroOrbita_ ---
     Vec3 centroOrbita_;
@@ -74,8 +75,8 @@ private:
 
     static constexpr float UMBRAL_VOLCADO = 0.70f;      // ~40 grados de roll/pitch -> se considera volcado
     static constexpr float VELOCIDAD_GIRO_MAX = 1.5f;   // rad/s, que tan rapido puede girar la proa visualmente
-    static constexpr float DURACION_VOLCADO = 2.0f;     // segundos volcado antes de empezar a hundirse
-    static constexpr float DURACION_HUNDIMIENTO = 3.0f; // segundos hundiendose antes de poder eliminarse
+    static constexpr float DURACION_VOLCADO = 1.0f;     // segundos volcado antes de empezar a hundirse
+    static constexpr float DURACION_HUNDIMIENTO = 1.5f; // segundos hundiendose antes de poder eliminarse
     static constexpr float COOLDOWN_COLISION = 1.5f;    // evita re-colisionar el mismo par cada frame
 };
 #endif //CG_OCEANO_DINAMICO_BARCO_H

@@ -6,14 +6,14 @@ Isla::Isla(Vec3 centro, Shader* shader, unsigned semilla)
     mallaEsfera_ = std::make_unique<ObjetoRenderizable>(Primitivas::crearEsfera(10, 14));
 
     std::mt19937 rng(semilla);
-    std::uniform_real_distribution<float> offset(-3.0f, 3.0f);
-    std::uniform_real_distribution<float> escalaXZ(0.6f, 1.6f);
-    std::uniform_real_distribution<float> escalaY(0.4f, 0.9f);
+    std::uniform_real_distribution<float> offset(-5.0f, 5.0f);
+    std::uniform_real_distribution<float> escalaXZ(1.0f, 2.6f);
+    std::uniform_real_distribution<float> escalaY(0.7f, 1.6f);
     std::uniform_real_distribution<float> tonoGris(0.35f, 0.55f);
 
     // Base principal de la isla (roca grande y achatada)
     rocas_.push_back({
-        Mat4::trasladar(centro_) * Mat4::escalar({3.0f, 1.2f, 3.0f}),
+        Mat4::trasladar(centro_) * Mat4::escalar({5.0f, 2.2f, 5.0f}),
         Vec3{0.45f, 0.42f, 0.35f}
     });
 

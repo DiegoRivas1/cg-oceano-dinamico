@@ -22,7 +22,7 @@ void main() {
     vec3 dirVista = normalize(posCamara - fragPos);
     vec3 reflejo = reflect(-dirLuz, n);
 
-    vec3 ambiente = colorAmbiente * colorObjeto;
+    vec3 ambiente = colorAmbiente * colorObjeto * colorLuz;    // (basico.frag)
 
     float difIntensidad = max(dot(n, dirLuz), 0.0);
     vec3 difuso = difIntensidad * colorObjeto * colorLuz;

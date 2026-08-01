@@ -53,6 +53,8 @@ public:
 
     // Evalua la altura real del oceano en (x,z) en el tiempo acumulado actual.
     // Usada por otros elementos de la escena (ej. el barco) para "flotar".
+    void establecerZonaCalma(Vec3 centro, float radio, float margen = 6.0f);
+
     float alturaEn(float x, float z) const;
 
     // Pendiente local del oceano en (x,z): dh/dx, dh/dz. El barco la usa
@@ -110,4 +112,9 @@ private:
     float velocidad_ = 1.0f;
     bool usarTextura_ = true;
     bool usarIluminacion_ = true;
+
+    Vec3 zonaCalmaCentro_{0.0f, 0.0f, 0.0f};
+    float zonaCalmaRadio_ = -1.0f;   // -1 = desactivada
+    float zonaCalmaMargen_ = 6.0f;
+    float factorCalmaEn(float x, float z) const;
 };

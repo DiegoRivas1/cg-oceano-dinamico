@@ -25,7 +25,7 @@ private:
     Vec3 objetivo_{0.0f, 0.0f, 0.0f};
     Vec3 posicionCalculada_;
 
-    static constexpr float PITCH_MIN = 0.1f;
+    static constexpr float PITCH_MIN = -1.5f;//0.1f
     static constexpr float PITCH_MAX = 1.5f;
     static constexpr float RADIO_MIN = 3.0f;
     static constexpr float RADIO_MAX = 120.0f;

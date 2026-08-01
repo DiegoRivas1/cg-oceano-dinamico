@@ -1,7 +1,6 @@
 #ifndef CG_OCEANO_DINAMICO_ESCENA_H
 #define CG_OCEANO_DINAMICO_ESCENA_H
 
-#pragma once
 // Escena.h
 // Punto de composicion final: agrupa Oceano, la camara, la luz principal
 // y los elementos adicionales (creados via ElementoEscenaFactory). main.cpp
@@ -14,6 +13,7 @@
 #include "Camara.h"
 #include "ElementoEscena.h"
 #include "Shader.h"
+#include "ObjetoRenderizableTexturado.h"
 
 class Faro; // fwd decl: la escena consulta su posicion de luz secundaria
 
@@ -27,7 +27,20 @@ public:
     Camara& camara() { return camara_; }
     Oceano& oceano() { return *oceano_; }
 
+    void gestionarColisionBarcoIsla();
+
 private:
+
+    std::unique_ptr<Shader> shaderTexturado_;
+    std::unique_ptr<ObjetoRenderizableTexturado> modeloBarcoCompartido_; // nullptr si no existe el .obj
+    std::unique_ptr<ObjetoRenderizableTexturado> modeloPezCompartido_;   // nullptr si no existe el .obj
+    std::unique_ptr<ObjetoRenderizableTexturado> cargarModeloCompartido(
+    const std::string& rutaObj, const std::string& rutaTextura,
+    const std::string& grupo, float tamanoObjetivo, const std::string& etiquetaLog);
+
+    Vec3 posicionIsla_{15.0f, 0.0f, 10.0f};
+    float radioColisionIsla_ = 9.0f;
+
     std::unique_ptr<Oceano> oceano_;
     std::unique_ptr<Shader> shaderBasico_;
     std::vector<std::unique_ptr<ElementoEscena>> elementos_;
@@ -72,6 +85,14 @@ private:
     void gestionarColisionesBarcos();
     void gestionarSpawnBarcos(float deltaTiempo);
     void eliminarBarcosHundidos();
+
+    void crearGruposPeces();
+    void crearNubes();
+
+    std::uniform_real_distribution<float> profundidadPezAleatoria_{1.5f, 4.0f};
+    std::uniform_real_distribution<float> radioPezAleatorio_{1.0f, 3.0f};
+    std::uniform_real_distribution<float> velocidadPezAleatoria_{0.3f, 0.8f};
+    std::uniform_real_distribution<float> anguloPezAleatorio_{0.0f, 6.2831853f};
 };
 
 #endif //CG_OCEANO_DINAMICO_ESCENA_H

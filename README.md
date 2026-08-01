@@ -9,7 +9,7 @@ Sistema de animación por computador de un océano en movimiento, usando OpenGL 
 ## Descripción
 
 La superficie del océano es una malla regular de triángulos sobre el plano `xz`.
-Cada punto sube y baja con el tiempo según la superposición de **19 olas
+Cada punto sube y baja con el tiempo según la superposición de **20 olas
 sinusoidales** (cargadas desde `data/spectrum.txt`), siguiendo la fórmula:
 
 ```
@@ -19,7 +19,7 @@ kᵢ = 4π²fᵢ² / 9.81
 
 A diferencia de los labs anteriores (immediate mode / CPU), aquí la altura y
 la normal de cada vértice se calculan **en el vertex shader (GPU)**, una vez
-por vértice por frame — más eficiente con 19 olas y una malla de ~150×150 puntos.
+por vértice por frame — más eficiente con 20 olas y una malla de ~150×150 puntos.
 
 ## Estructura de clases
 
@@ -33,9 +33,10 @@ por vértice por frame — más eficiente con 19 olas y una malla de ~150×150 p
 | `Camara` | Cámara orbital (rotar, zoom, `obtenerVista()`). |
 | `Primitivas` | Generadores procedurales de malla (caja, esfera, cono, cilindro). |
 | `ObjetoRenderizable` | Composición: sube una `MallaSimple` a GPU y se dibuja con un `Shader` dado. |
-| `ElementoEscena` | Interfaz común de `Barco`, `Isla`, `Faro`, `Skybox`. |
+| `ElementoEscena` | Interfaz común de `Barco`, `Isla`, `Faro`, `Skybox`, `Sol`, `Luna`, `Nube`, `Pez`. |
 | `ElementoEscenaFactory` | **Patrón Factory Method** crea cada tipo de elemento adicional. |
 | `Escena` | Composición final: `Oceano` + elementos + `Camara` + luces. |
+| `CicloDiaNoche` | Define la matemática del ciclo día/noche (ángulos de sol/luna y factor de luz). |
 
 ## Elementos adicionales de la escena
 
@@ -43,6 +44,18 @@ por vértice por frame — más eficiente con 19 olas y una malla de ~150×150 p
 - **Isla + rocas** generación procedural con semilla fija (reproducible).
 - **Faro** además decorativo, expone `posicionLuz()` como segunda fuente de luz (parpadeo incluido).
 - **Skybox** cúpula con gradiente de color (sin depender de texturas cubemap externas).
+- **Sol + Luna** recorren el cielo en ciclo día/noche sincronizado.
+- **Nubes** procedurales con deriva horizontal continua.
+- **Peces** animados bajo la superficie, en grupos y con ondulación vertical.
+
+## Novedades recientes
+
+- **Optimización de memoria GPU**: los modelos `.obj` pesados (barco y pez) se cargan **una sola vez** y luego se reutilizan en múltiples instancias.
+- **Colisiones dinámicas**:
+  - barco vs barco (rebote o hundimiento según impacto),
+  - barco vs isla (cambio de dirección con cooldown).
+- **Ola errática** integrada tanto en GPU (malla visible) como en CPU (`alturaEn`/`gradienteEn`) para afectar visual y físicamente a los barcos.
+- **Cámara mejorada**: rotación vertical en ambos sentidos (arriba/abajo) más zoom con scroll.
 
 ## Compilar (CLion + MSYS2 UCRT64)
 
@@ -79,5 +92,4 @@ ejecuciones (útil para grabar el video de entrega).
 
 - [ ] Grabar video corto de la animación
 - [ ] Completar `docs/informe/informe.tex` con capturas propias
-- [ ] Revisar rendimiento con las 19 olas en tu hardware (bajar `filas/columnas` en `Escena.cpp` si hace falta)
-- [ ] (Opcional) Reemplazar primitivas procedurales del barco/faro por modelos `.obj` si quieres más detalle visual
+- [ ] Revisar rendimiento con las 20 olas en tu hardware (bajar `filas/columnas` en `Escena.cpp` si hace falta)

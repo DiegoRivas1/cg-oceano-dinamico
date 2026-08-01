@@ -45,6 +45,15 @@ add_executable(cg_oceano
         shared/OBJLoader.h
         src/ObjetoRenderizableTexturado.h
         src/ObjetoRenderizableTexturado.cpp
+        src/CicloDiaNoche.h
+        src/Pez.h
+        src/Pez.cpp
+        src/Sol.h
+        src/Sol.cpp
+        src/Luna.h
+        src/Luna.cpp
+        src/Nube.h
+        src/Nube.cpp
 )
 
 target_include_directories(cg_oceano PRIVATE

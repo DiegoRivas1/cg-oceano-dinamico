@@ -22,39 +22,23 @@ float normalizarDiferenciaAngular(float diferencia) {
 }
 }
 
-Barco::Barco(Vec3 centroOrbita, Shader* shader, float radioOrbita, float velocidadAngular, float anguloInicial)
-    : shader_(shader),
+Barco::Barco(Vec3 centroOrbita, Shader* shaderBasico, Shader* shaderTexturado,
+             ObjetoRenderizableTexturado* modeloCompartido,
+             float radioOrbita, float velocidadAngular, float anguloInicial)
+    : shader_(shaderBasico),
+      shaderTexturado_(shaderTexturado),
+      modeloReal_(modeloCompartido),
       centroOrbita_(centroOrbita),
       radioOrbita_(radioOrbita),
       velocidadAngular_(velocidadAngular),
       anguloInicial_(anguloInicial) {
 
-    std::ifstream prueba(RUTA_MODELO_OBJ);
-    usaModeloReal_ = prueba.good();
-
-    if (usaModeloReal_) {
-        std::cout << "[Barco] Modelo real encontrado, cargando " << RUTA_MODELO_OBJ << "\n";
-        MallaOBJ malla = OBJLoader::cargar(RUTA_MODELO_OBJ, NOMBRE_GRUPO_BARCO);
-
-        if (malla.vertices.empty()) {
-            // El nombre del grupo no coincidio (o el .obj cambio) - no hay
-            // triangulos que dibujar. Nos caemos al fallback procedural en
-            // vez de mostrar un barco invisible.
-            std::cerr << "[Barco] El grupo '" << NOMBRE_GRUPO_BARCO << "' no dio triangulos, uso fallback procedural.\n";
-            usaModeloReal_ = false;
-        } else {
-            OBJLoader::normalizarEscala(malla, /*tamanoObjetivo*/ 4.0f);
-            shaderTexturado_ = std::make_unique<Shader>("shaders/textura_objeto.vert", "shaders/textura_objeto.frag");
-            modeloReal_ = std::make_unique<ObjetoRenderizableTexturado>(malla, RUTA_TEXTURA_CASCO);
-        }
-    } else {
-        std::cout << "[Barco] No se encontro " << RUTA_MODELO_OBJ << ", uso primitivas procedurales.\n";
-    }
+    usaModeloReal_ = (modeloReal_ != nullptr);
 
     if (!usaModeloReal_) {
-        casco_  = std::make_unique<ObjetoRenderizable>(Primitivas::crearCaja(2.5f, 0.8f, 1.0f));
-        mastil_ = std::make_unique<ObjetoRenderizable>(Primitivas::crearCilindro(0.06f, 2.2f));
-        vela_   = std::make_unique<ObjetoRenderizable>(Primitivas::crearCaja(0.05f, 1.4f, 0.9f));
+        casco_  = std::make_unique<ObjetoRenderizable>(Primitivas::crearCaja(4.0f, 1.3f, 1.6f));
+        mastil_ = std::make_unique<ObjetoRenderizable>(Primitivas::crearCilindro(0.09f, 3.2f));
+        vela_   = std::make_unique<ObjetoRenderizable>(Primitivas::crearCaja(0.08f, 2.0f, 1.3f));
     }
 }
 
@@ -69,7 +53,7 @@ void Barco::actualizar(float tiempo, const Oceano& oceano) {
 
     if (estado_ == EstadoBarco::Hundiendose) {
         tiempoEnEstado_ += deltaTiempo;
-        alturaActual_ -= deltaTiempo * 0.6f; // se hunde progresivamente, sin recalcular la orbita
+        alturaActual_ -= deltaTiempo * 1.4f; // se hunde progresivamente, sin recalcular la orbita
         return;
     }
 
@@ -162,7 +146,7 @@ bool Barco::listoParaEliminar() const {
 
 void Barco::dibujar(const Mat4& vista, const Mat4& proyeccion,
                      const Vec3& posCamara, const Vec3& posLuz, const Vec3& colorLuz) const {
-    Mat4 flotacion = Mat4::trasladar({posicionBase_.x, alturaActual_ + 0.4f, posicionBase_.z})
+    Mat4 flotacion = Mat4::trasladar({posicionBase_.x, alturaActual_ + 0.65f, posicionBase_.z})
                     * Mat4::rotarY(yaw_)
                     * Mat4::rotarZ(roll_)
                     * Mat4::rotarX(pitch_);
@@ -196,8 +180,8 @@ void Barco::dibujar(const Mat4& vista, const Mat4& proyeccion,
     casco_->dibujar(*shader_, flotacion);
 
     shader_->setVec3("colorObjeto", Vec3{0.30f, 0.20f, 0.10f});
-    mastil_->dibujar(*shader_, flotacion * Mat4::trasladar({0.0f, 0.4f, 0.0f}));
+    mastil_->dibujar(*shader_, flotacion * Mat4::trasladar({0.0f, 0.65f, 0.0f}));
 
     shader_->setVec3("colorObjeto", Vec3{0.95f, 0.95f, 0.90f}); // vela: blanco
-    vela_->dibujar(*shader_, flotacion * Mat4::trasladar({0.0f, 0.9f, 0.0f}));
+    vela_->dibujar(*shader_, flotacion * Mat4::trasladar({0.0f, 1.3f, 0.0f}));
 }
